@@ -40,4 +40,9 @@ Using different input file than the default (=input.xml) is done via
 
 rayfactor 4 -f yourInputFile.xml
 
+Functionality of the Algorithm
+=================
+The code performs ray tracing by considering all possible combinations of defined primitives. See the function 'tracefactors' of each primitive in the source code.
+
+The user can de-activate certain combinations by using the 'analyse="false"' switch in the primitive definition (of course, the primitive is still considered part of the system!). This de-activation will greatly improve the speed in case only view factors from a single object are of interest.
 

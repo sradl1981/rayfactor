@@ -516,22 +516,18 @@ void Scene::findViewFactors()
 
 	VFMatrix *vfm = new VFMatrix(numPrimitives);
 	
-	//Seed the random number generator
-	//srand((unsigned)time(NULL));
-	
 	
 	struct timeval startTime, endTime;
 	
 	for(Primitive* pobj = head; pobj != NULL; pobj = pobj->next)
 	{
 		cout << "Processing Object " << currSurf << " of " << numPrimitives << endl;
-		//pobj->dirAffine->print();
+
 		gettimeofday(&startTime, NULL);
 		
 		if(pobj->willAnalyse()) {
 			pobj->traceFactors(head, vfm);
 		}
-		
 		
 		gettimeofday(&endTime, NULL);
 		float t = (1000*(endTime.tv_sec-startTime.tv_sec)+(endTime.tv_usec-startTime.tv_usec)/1000);

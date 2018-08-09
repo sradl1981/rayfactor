@@ -1,19 +1,25 @@
 <?xml version="1.0" ?>
 <project>
 	<settings>
-		<globalRayDensity value="1e7" />
-		<description>Benchmarking geometry for Sphere-Sphere</description>
+		<globalRayDensity value="1e6" />
+		<description>
+            Benchmarking geometry for Sphere-Sphere-Sphere interaction
+            In this benchmark only the view factor from sphere 1 
+            to the two other spheres is analyzed. 
+            Thus, only the first row of the view factor matrix is evaluated            
+
+        </description>
 	</settings>
 	<geometry>
 		<primitive type="sphere" >
 			<scale x="1.0" y="1.0" z="1.0" />
             <translation x="0.0" y="0.0" z="0.0" />
 		</primitive>
-		<primitive type="sphere" >
+		<primitive type="sphere" analyse="false">
 			<scale x="1.0" y="1.0" z="1.0" />
             <translation x="0.0" y="0.0" z="2.0" />
 		</primitive>
-		<primitive type="sphere" >
+		<primitive type="sphere" analyse="false">
 			<scale x="1.0" y="1.0" z="1.0" />
             <translation x="0.0" y="1.0" z="4.0" />
 		</primitive>
