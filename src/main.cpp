@@ -13,7 +13,7 @@
 
 using namespace std;
 
-int main (int argc, char * const argv[]) {
+int main (int argc, char ** argv) {
     int noThreads = 0;
     
     if(argc > 1) {
@@ -24,7 +24,28 @@ int main (int argc, char * const argv[]) {
     }
     
 	Scene scene;
+
+    bool standardInputFile=false;
 	string xmlpath = "input.xml";
+    if(argc>2)
+    {
+        if(argc<4)
+        {
+            printf("ERROR: you MUST specify an input file name after '-f'. \n");            
+            exit (1);
+        }
+        if (strcmp(argv[2],"-f") == 0)
+        {
+            xmlpath.assign(argv[3]);
+            printf("...using input file '%s'\n", xmlpath.c_str());  
+        }
+        else
+            standardInputFile=true;
+    }
+
+    if(standardInputFile)
+        printf("will use input.xml as the input file.\n");
+
 	scene.readScene(xmlpath.c_str());
 
 	//readFile(scene);
