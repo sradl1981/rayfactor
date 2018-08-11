@@ -33,13 +33,17 @@ private:
 	bool isBoundingElement;				// Whether the rays shoot outward (N) or inward (Y)
 	bool willAnalysePrimitive;
 protected:
-	Vector scaleVector;
+
 public:
     static int numThreads;
     __m128 iden;
 	Primitive *next;
 	int rayDensity;
+	int globalID;
 	
+	Vector center;
+	Vector scaleVector;
+			
 	//AffineTransfrm *aS;
 
     Matrix4 affine;

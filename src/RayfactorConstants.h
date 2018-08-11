@@ -26,3 +26,6 @@
 #define kDescription		"description"
 #define kValue				"value"
 
+#define kPrintViewFactors   "printViewFactors"
+#define kPrintParticles     "printParticles"
+

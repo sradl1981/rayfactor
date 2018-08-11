@@ -18,6 +18,8 @@ Scene::Scene()
     head = NULL;
     tail = NULL;
 	numPrimitives = 0;
+	printViewFactors = true;
+	printParticles   = true;
 }
 
 //Note put a deconstructor: see free Scene
@@ -83,6 +85,14 @@ bool Scene::loadSettings( TiXmlElement *settings )
 		else if(typeStr.compare(kDescription) == 0) 
 		{
 			sceneDescription = string(child->GetText());
+		}
+		else if(typeStr.compare(kPrintViewFactors) == 0) 
+		{
+			printViewFactors = bool(child->GetText());
+		}
+		else if(typeStr.compare(kPrintParticles) == 0) 
+		{
+			printParticles = bool(child->GetText());
 		}
 	}
 	
@@ -425,6 +435,14 @@ bool Scene::initPrimitive( TiXmlElement *xmlElement, Primitive &primitive )
 			
 			primitive.rotate(degRot, Vector(xAxis,yAxis,zAxis));
 		}
+		else if(typeStr.compare("globalID") == 0) 
+		{
+			int globalID;
+			
+			child->QueryValueAttribute( "id", &globalID );
+			
+			primitive.globalID = globalID;
+		}
 	}
 	
 	//Set the scene defaults if no specific attributes were found
@@ -514,14 +532,16 @@ void Scene::findViewFactors()
 {
 	int currSurf = 1;
 
-	VFMatrix *vfm 		  = new VFMatrix(numPrimitives);
-	VFMatrix *vfmInverse  = new VFMatrix(numPrimitives); //inverse view factors. useful if analyze from plane
+	vfm        = new VFMatrix(numPrimitives);
+	vfmInverse = new VFMatrix(numPrimitives); //inverse view factors. useful if analyze from plane
 	
 	struct timeval startTime, endTime;
 	
 	for(Primitive* pobj = head; pobj != NULL; pobj = pobj->next)
 	{
-		cout << "Processing Object " << currSurf << " of " << numPrimitives << endl;
+		cout << "Processing Object " << currSurf 
+		     << " (with globalID: " << pobj->globalID << ")"
+		    << " of " << numPrimitives << endl;
 
 		gettimeofday(&startTime, NULL);
 		
@@ -549,8 +569,64 @@ void Scene::findViewFactors()
 		currSurf++;
 	}
 	
-	vfm->print(string("vfMatrix.txt"), 6);
-	vfmInverse->print(string("vfMatrixInverted.txt"), 6);
+	if(printViewFactors)
+	{
+	    vfm->print(string("vfMatrix.txt"), 6);
+	    vfmInverse->print(string("vfMatrixInverted.txt"), 6);
+	}
 	
+	if(printParticles)
+	{
+	    printParticlesToFile(string("rayFactor.liggghts"), 6);
+	}	
     return;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	Scene::printParticles
+//
+//	Comments : Will write particle information (including view factors) in LIGGGHTS format for first object
+//
+//	Date		Developer		Action
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	12/08/18	Stefan Radl     Created
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Scene::printParticlesToFile(string filename, int precision)
+{
+	ofstream out(filename.c_str());
+	out.precision(precision);
+	
+	//Print the top row
+    out << "ITEM: TIMESTEP" << endl;
+    out << "0" << endl;
+    out << "ITEM: NUMBER OF ATOMS" << endl;
+    out << "TODO" << endl;
+    out << "ITEM: BOX BOUNDS pp pp pp" << endl;
+    out << "TODO" << endl;
+    out << "TODO" << endl;
+    out << "TODO" << endl;
+    out << "ITEM: ATOMS id type x y z radius vf vfInverse" << endl;
+
+    int j = 0;
+	for(Primitive* pobj = head; pobj != NULL; pobj = pobj->next)
+	{
+	    if(pobj->globalID>=0) //only do for particles that have a global ID
+	    {
+            out << pobj->globalID << " 1 ";
+		    out << std::scientific;
+            out << pobj->center._x << " "
+                << pobj->center._y << " "
+                << pobj->center._z << " ";
+            out << pobj->scaleVector._x << " ";
+            out << vfm->getViewFactor(0,j) << " ";
+            out << vfmInverse->getViewFactor(0,j) << " ";
+		    out << endl;
+		    out << std::fixed;	    
+	    }
+	    j++;
+	}
+	out.close();
+
 }

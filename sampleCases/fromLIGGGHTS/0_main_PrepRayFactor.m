@@ -10,7 +10,7 @@ addpath(SRC_PATH); %Source octave magic
 %%%%%%%%%%%%%%%%%%%%%%%% USER INPUT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 data.fileIn = 'dump.liggghts';
 data.STLprefix='STL';
-data.ColumID  = 1; %Column with radius
+data.ColumID  = 1; %Column with Global ID
 data.ColumPos = 3; %Column with x position
 data.ColumRad =15; %Column with radius
 
@@ -148,6 +148,9 @@ if(querry.writeFiles)
                          domain.walls{iSTL}.center(2), ...
                          domain.walls{iSTL}.center(3));
         fprintf(fid,[string]);
+        string = sprintf('    <globalID id="%.0f" />\n',
+                         -1);
+        fprintf(fid,[string]);                  
         string = sprintf('  </primitive>\n');
         fprintf(fid,[string]); 
     endfor
@@ -161,11 +164,14 @@ if(querry.writeFiles)
          %TODO: implement particle of interes
                 string = sprintf('  <primitive type="sphere" analyse="false"> \n');
                 fprintf(fid,[string]); 
-                string = sprintf('    <scale x="%d" y="%d" z="%d"/> \n ', ...
+                string = sprintf('    <scale x="%d" y="%d" z="%d"/> \n', ...
                                     particles.radius(i),particles.radius(i),particles.radius(i));
                 fprintf(fid,[string]); 
                 string = sprintf('    <translation x="%d" y="%d" z="%d" /> \n', ...
                                   particles.x(i),particles.y(i),particles.z(i));              
+                fprintf(fid,[string]); 
+                string = sprintf('    <globalID id="%.0f" />\n',
+                                 particles.id(i));
                 fprintf(fid,[string]); 
                 string = sprintf('  </primitive>\n');
                 fprintf(fid,[string]); 

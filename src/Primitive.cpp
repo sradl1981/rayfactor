@@ -141,6 +141,7 @@ void Primitive::translate(Vector d)
     affineTransformation::translate(affine, d);
     affineTransformation::invTranslate(invAffine, d);
     //aS->translate(d);
+    center=d;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

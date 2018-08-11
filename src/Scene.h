@@ -8,6 +8,9 @@
 #ifndef __SCENE_H__
 #define __SCENE_H__
 
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <typeinfo>
 #include <vector>
 #include <sys/time.h>
@@ -36,10 +39,15 @@ class Scene {
     private:
 		Primitive *tail;
 		Primitive *head;
+		
+		VFMatrix *vfm;
+		VFMatrix *vfmInverse;
 	
 		float globalRayDensity;
 		float numPrimitives;
 		string sceneDescription;
+		bool   printViewFactors;
+		bool   printParticles;
     public:
         static int numThreads;
     
@@ -55,6 +63,7 @@ class Scene {
 	
         Primitive* getObject(int obID);
         void findViewFactors();		// Will change to radiative heat transfer -> look at shade
+        void printParticlesToFile(string filename, int precision);
 };
 
 #endif
