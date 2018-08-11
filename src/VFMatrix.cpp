@@ -73,7 +73,7 @@ int VFMatrix::getNoObjects()
 //	Comments : Returns the view factor from the object in row r to the object in column c
 //
 //	Arguments :		r is the row of the view factor matrix (object the view factor is from)
-//					c is the column of the view factor matrix (object the view factor is to)
+//			        c is the column of the view factor matrix (object the view factor is to)
 //
 //	Date		Developer		Action
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,11 +120,10 @@ void VFMatrix::setViewFactor(float vF, int r, int c)
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void VFMatrix::print()
+void VFMatrix::print(string outName, int precision)
 {
-	ofstream out("view-factor-matrix.txt");
-	//out.open("view-factor-matrix.txt");
-	out.precision(15);
+	ofstream out(outName.c_str());
+	out.precision(precision);
 	
 	//Print the top row
 	out << "Object";
@@ -134,15 +133,17 @@ void VFMatrix::print()
 	}
 	
 	out << endl;
-	
+
 	for(int i = 0; i < noObjects; i++)
 	{
 		out << i+1;
+		out << std::scientific;
 		for(int j = 0; j < noObjects; j++)
 		{
 			out << "," << (float)vfm[i][j];
 		}
 		out << endl;
+		out << std::fixed;
 	}
 	out.close();
 }

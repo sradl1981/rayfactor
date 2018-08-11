@@ -71,10 +71,12 @@ public:
     void alignRayDirection(Rayx4 &wsRay, const Rayx4 &osRay, const Vectorx4 &wsNormal);
     void getOSRayDirection(Rayx4 &osRay, const __m128& azimuthal, const __m128 &R, __m128 zenith);
     
+    void  invertViewFactors(Primitive* head, VFMatrix* vfm, VFMatrix* fvmInverse);
+    
 	// Implemented by the subclasses
-	//virtual float surfaceArea()=0;
-	virtual void hit( const Rayx4& r, __m128& t, __m128& objectNo )=0;
-	virtual void traceFactors( Primitive* head, VFMatrix* vfm )=0;
+	virtual float surfaceArea() {return -1;};
+	virtual void  hit( const Rayx4& r, __m128& t, __m128& objectNo )=0;
+	virtual void  traceFactors( Primitive* head, VFMatrix* vfm )=0;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

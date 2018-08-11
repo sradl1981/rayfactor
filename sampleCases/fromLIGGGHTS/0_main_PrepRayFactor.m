@@ -8,8 +8,8 @@ SRC_PATH='../../octave';
 addpath(SRC_PATH); %Source octave magic
 
 %%%%%%%%%%%%%%%%%%%%%%%% USER INPUT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 data.fileIn = 'dump.liggghts';
+data.STLprefix='STL';
 data.ColumID  = 1; %Column with radius
 data.ColumPos = 3; %Column with x position
 data.ColumRad =15; %Column with radius
@@ -18,8 +18,21 @@ data.ColumRad =15; %Column with radius
 #This is used to select particles. Keept empty to take all particles in dump
 # file
 domain.bound.x = [0,5];
-domain.bound.y = [0,8];
+domain.bound.y = [0,5];
 domain.bound.z = [0,12];
+
+%the wall(s) 
+domain.walls{1}.span = [10  ...
+                        10  ...
+                        0]; %this is an xy plane with a certain length, so no need to rotate for rayfactor
+domain.walls{1}.normalDir = 1; %in positive direction (here: z);
+domain.walls{1}.origin = [0 0 0]; %Origin at zero : this is NOT STANDARD for rayfactor, so need to translate
+
+%the wall(s) 
+domain.walls{2}.span = domain.walls{1}.span ;
+domain.walls{2}.normalDir = -1; %in NEGATIVE direction (here: minus z);
+domain.walls{2}.origin = [0 0 1.12]; %Origin at zero : this is NOT STANDARD for rayfactor, so need to translate
+
 
 domain.scale.x = 1.0;  %Should be equal to 1 to easily calc volume fraction
 domain.scale.y = 1.0;
@@ -27,8 +40,8 @@ domain.scale.z = 1.0;
 
 querry.order                = false;	   # Should be ordered to any specific x/y/z - TODO: implement
 querry.particleOfInterest   = 3;       # enables to select a particle of interest which will be analysed, if wall is written, automatically set to false 
-querry.writeXml             = true;
-globalRayDensity            = 1e6; %ray density per unit area
+querry.writeFiles             = true;
+globalRayDensity            = 2e5; %ray density per unit area
 
 %%%%%%%%%%%%%%%%%%%%%%%% USER INPUT END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -102,39 +115,63 @@ end
 
 %%%%%%%%%%%%%%%% CREATE XML INPUT %%%%%%%%%%%%%%%%%%%%%%%%%
 
-if(querry.writeXml)
-    i=1;
+if(querry.writeFiles)
+
+    %File names
     endingPos = strfind(data.fileIn,'.liggghts');
     fileRawName = data.fileIn(1:endingPos-1)
     file_name = sprintf('input_%s_%.5f.xml', fileRawName, domain.phiPart);
+    file_nameStl = sprintf('%s_%s_%.5f.stl', data.STLprefix, fileRawName, domain.phiPart);
     fid=fopen(file_name,'w');  
+    
     %% Write File Structure %%
 
-    string = sprintf('<?xml version="1.0" ?> \n <project>  \n <settings> \n <globalRayDensity value="%d" /> \n <description> \n ... \n </description> \n </settings> \n <geometry> \n',globalRayDensity);
+    string = sprintf('<?xml version="1.0" ?> \n<project>  \n<settings> \n  <globalRayDensity value="%d" /> \n  <description> \n    LIGGGHTS Interface Output \n  </description> \n </settings> \n<geometry> \n',globalRayDensity);
     fprintf(fid,[string]);
     
+    %% PLANES %% TODO: Implement rotation
+    for(iSTL=1:size(domain.walls,2))
+        %complete STL information   
+        domain.walls{iSTL}.center = domain.walls{iSTL}.span./2 + domain.walls{iSTL}.origin;
+        string = sprintf('  <primitive type="rectangle"> \n');
+        fprintf(fid,[string]);
+        spanForXML=ifelse(domain.walls{iSTL}.span==0, ...
+                          domain.walls{iSTL}.normalDir, ...
+                          domain.walls{iSTL}.span/2); %set span for empty to 1, also divide by 2 since span in XML is HALF width!!
+        string = sprintf('    <scale x="%.4g" y="%.4g" z="%.4g" />\n ', ...
+                          spanForXML(1), ...
+                          spanForXML(2), ...
+                          spanForXML(3));
+        fprintf(fid,[string]);
+        string = sprintf('   <translation x="%.4g" y="%.4g" z="%.4g" />\n', ...
+                         domain.walls{iSTL}.center(1), ...
+                         domain.walls{iSTL}.center(2), ...
+                         domain.walls{iSTL}.center(3));
+        fprintf(fid,[string]);
+        string = sprintf('  </primitive>\n');
+        fprintf(fid,[string]); 
+    endfor
     
-      %% Write Plane of interest %%
-      string = sprintf('<primitive type="rectangle"> \n  <scale x="%.4g" y="%.4g" z="%.4g" />\n ', ...
-                        domain.bound.x(2),domain.bound.y(2),domain.bound.z(2));
-      fprintf(fid,[string]);
-      string = sprintf('           </primitive> \n ');
-      fprintf(fid,[string]); 
+    %...also dump to STL
+    stlWriter(file_nameStl, domain.walls);
 
-      %Write Particles
-      while(i<=size(particles.radius,1))      
+    %PARTICLES
+    i=1;
+    while(i<=size(particles.radius,1))      
          %TODO: implement particle of interes
-                string = sprintf('<primitive type="sphere" analyse="false"> \n');
+                string = sprintf('  <primitive type="sphere" analyse="false"> \n');
                 fprintf(fid,[string]); 
-                string = sprintf('<scale x="%d" y="%d" z="%d"/> \n ', ...
+                string = sprintf('    <scale x="%d" y="%d" z="%d"/> \n ', ...
                                     particles.radius(i),particles.radius(i),particles.radius(i));
                 fprintf(fid,[string]); 
-                string = sprintf('<translation x="%d" y="%d" z="%d" /> \n </primitive>\n', ...
+                string = sprintf('    <translation x="%d" y="%d" z="%d" /> \n', ...
                                   particles.x(i),particles.y(i),particles.z(i));              
                 fprintf(fid,[string]); 
+                string = sprintf('  </primitive>\n');
+                fprintf(fid,[string]); 
                 i=i+1;
-      end  
-    string = sprintf('</geometry> \n </project>\n');
+    end  
+    string = sprintf('</geometry> \n</project>\n');
     fprintf(fid,[string]); 
     fclose(fid);
 end

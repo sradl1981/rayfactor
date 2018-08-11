@@ -4,13 +4,14 @@ Stefan Radl, TU Graz, 2018
 
 Random Number Generator
 ==================
-the dSFMT algorithm has been implemented (see Chapter 4.3).
+The dSFMT algorithm has been implemented in rayFactor (see Chapter 4.3) to generate random numbers.
 
 Primitives (that define the "scene", i.e., the geometry)
 ===========
 see Chapter 2.4 of the thesis
 
-In general, all primitives have a RADIUS of 1. The rectangle has a unit width of 2 (i.e., 2x1)
+In general, all primitives have a RADIUS (or LENGTH) of 1. For example, the rectangle has a unit width of 2 (i.e., it has an area of 2x2 length units).
+All primitives are assumed to be centered (or based) on the xy-plane and the ORIGIN (i.e., [0 0 0]).
 
 Primitives include 
 - rectangle

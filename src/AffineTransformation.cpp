@@ -55,7 +55,7 @@ void scale(Matrix4 &x, float sx, float sy, float sz)
     
     if(fabs(sx) < sEps || fabs(sy) < sEps || fabs(sz) < sEps)
     {
-        cerr << "Degenerate scaling transformation!\n";
+        cerr << "AffineTransformation::scale: Degenerate scaling transformation!\n";
     }
     scale.m[0] = sx;
     scale.m[5] = sy;
@@ -70,7 +70,7 @@ void invScale(Matrix4 &x, float sx, float sy, float sz)
     
     if(fabs(sx) < sEps || fabs(sy) < sEps || fabs(sz) < sEps)
     {
-        cerr << "Degenerate scaling transformation!\n";
+        cerr << "AffineTransformation::invScale: Degenerate scaling transformation!\n";
     }
     invScale.m[0] = 1.0f/sx;
     invScale.m[5] = 1.0f/sy;

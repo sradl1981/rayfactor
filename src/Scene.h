@@ -28,6 +28,8 @@
 #include "Triangle.h"
 #include "fastTriangle.h"
 
+#define VERBOSE_1 true
+
 using namespace std;
 
 class Scene {

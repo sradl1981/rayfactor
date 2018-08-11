@@ -514,8 +514,8 @@ void Scene::findViewFactors()
 {
 	int currSurf = 1;
 
-	VFMatrix *vfm = new VFMatrix(numPrimitives);
-	
+	VFMatrix *vfm 		  = new VFMatrix(numPrimitives);
+	VFMatrix *vfmInverse  = new VFMatrix(numPrimitives); //inverse view factors. useful if analyze from plane
 	
 	struct timeval startTime, endTime;
 	
@@ -526,7 +526,19 @@ void Scene::findViewFactors()
 		gettimeofday(&startTime, NULL);
 		
 		if(pobj->willAnalyse()) {
+		    //Perform  calculateion
 			pobj->traceFactors(head, vfm);
+			
+			//Invert viewfactor for ease
+#if VERBOSE_1 
+			std::cout << "inverting VFMatrix for object with ID " 
+                      << pobj->getID() 
+                      << ", and area = "
+                      << pobj->surfaceArea()
+                      << endl;
+            pobj->invertViewFactors(head,vfm,vfmInverse);
+#endif
+
 		}
 		
 		gettimeofday(&endTime, NULL);
@@ -537,7 +549,8 @@ void Scene::findViewFactors()
 		currSurf++;
 	}
 	
-	vfm->print();
+	vfm->print(string("vfMatrix.txt"), 6);
+	vfmInverse->print(string("vfMatrixInverted.txt"), 6);
 	
     return;
 }

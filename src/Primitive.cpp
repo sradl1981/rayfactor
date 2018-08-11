@@ -182,5 +182,33 @@ void Primitive::getFirstHit(Primitive* head, Rayx4& ray, __m128 &objectNo)
     }
 }
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	Primitive::invertViewFactors
+//
+//	Comments : Invert the view factors from master->slave to slave->master
+//
+//	Arguments: head is the start of a the list of scene objects in the current scene
+//			   vfm is the current view factor matrix
+//             vfmInverse is the new inverted view factor matrix to be generated
+//
+//	Date		Developer		Action
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	11/08/18	Stefan Radl     Created
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void  Primitive::invertViewFactors(Primitive* head, VFMatrix* vfm, VFMatrix* fvmInverse)
+{
+    float mySurfaceArea = this->surfaceArea();
+    const int noObjects = vfm->getNoObjects();
+    //Populate the view factor matrix
+    Primitive* pobj = head;
+	for(int j = 0; j < noObjects; j++)
+	{
+		fvmInverse->setViewFactor(vfm->getViewFactor(this->getID(), j) * mySurfaceArea /(pobj->surfaceArea()+1e-32), 
+		                          this->getID(),
+		                          j);
+		pobj = pobj->next;
+	}
+}
 

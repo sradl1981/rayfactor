@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <string>
 
 using namespace std;
 
@@ -26,6 +27,6 @@ class VFMatrix
 		int getNoObjects();
 		float getViewFactor(int r, int c);
 		void setViewFactor(float vF, int r, int c);
-		void print();
+		void print(string outName, int precision);
 };
 #endif
