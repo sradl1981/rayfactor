@@ -20,6 +20,9 @@ Scene::Scene()
 	numPrimitives = 0;
 	printViewFactors = true;
 	printParticles   = true;
+	particleCount    = 0;  
+	particleBoundingBoxLow.set(9e9,9e9,9e9,9e9);
+	particleBoundingBoxHigh.set(-9e9,-9e9,-9e9,-9e9);
 }
 
 //Note put a deconstructor: see free Scene
@@ -140,6 +143,8 @@ bool Scene::loadGeometry( TiXmlElement *geometry )
 			string analyseStr = primitive->Attribute("analyse");
 			willAnalyse = (analyseStr.compare("true") == 0);
 		}
+
+        if(willAnalyse) activePrimitives.push_back(objectID);
 		
 		if(prType.compare("cylinderSurface") == 0 || prType.compare("taperedCylinderSurface") == 0) {
 			Primitive *cylinder;
@@ -210,6 +215,16 @@ bool Scene::loadGeometry( TiXmlElement *geometry )
 			this->initPrimitive( primitive, *sphere);
 			
 			this->addObject( *sphere );
+			
+			particleCount++;
+			
+			particleBoundingBoxLow._x=min(particleBoundingBoxLow._x,sphere->center._x);
+			particleBoundingBoxLow._y=min(particleBoundingBoxLow._y,sphere->center._y);
+			particleBoundingBoxLow._z=min(particleBoundingBoxLow._z,sphere->center._z);
+
+			particleBoundingBoxHigh._x=max(particleBoundingBoxHigh._x,sphere->center._x);
+			particleBoundingBoxHigh._y=max(particleBoundingBoxHigh._y,sphere->center._y);
+			particleBoundingBoxHigh._z=max(particleBoundingBoxHigh._z,sphere->center._z);
 			
 		} else if(prType.compare( "triangle" ) == 0) {
             Triangle *triangle = new Triangle(objectID);
@@ -602,12 +617,17 @@ void Scene::printParticlesToFile(string filename, int precision)
     out << "ITEM: TIMESTEP" << endl;
     out << "0" << endl;
     out << "ITEM: NUMBER OF ATOMS" << endl;
-    out << "TODO" << endl;
+    out << particleCount << endl;
     out << "ITEM: BOX BOUNDS pp pp pp" << endl;
-    out << "TODO" << endl;
-    out << "TODO" << endl;
-    out << "TODO" << endl;
-    out << "ITEM: ATOMS id type x y z radius vf vfInverse" << endl;
+    out << particleBoundingBoxLow._x << " " << particleBoundingBoxHigh._x  << endl;
+    out << particleBoundingBoxLow._y << " " << particleBoundingBoxHigh._y  << endl;
+    out << particleBoundingBoxLow._z << " " << particleBoundingBoxHigh._z  << endl;
+    out << "ITEM: ATOMS id type x y z radius";
+    
+    //Iterate active primitives and write header
+    for (std::vector<int>::iterator it = activePrimitives.begin(); it != activePrimitives.end(); ++it)
+        out << " vf_" << *it << " vfInverse_" << *it;
+    out << endl;
 
     int j = 0;
 	for(Primitive* pobj = head; pobj != NULL; pobj = pobj->next)
@@ -620,8 +640,8 @@ void Scene::printParticlesToFile(string filename, int precision)
                 << pobj->center._y << " "
                 << pobj->center._z << " ";
             out << pobj->scaleVector._x << " ";
-            out << vfm->getViewFactor(0,j) << " ";
-            out << vfmInverse->getViewFactor(0,j) << " ";
+            for (std::vector<int>::iterator it = activePrimitives.begin(); it != activePrimitives.end(); ++it)
+                out << vfm->getViewFactor(*it, j) << " " << vfmInverse->getViewFactor(*it, j) << " ";
 		    out << endl;
 		    out << std::fixed;	    
 	    }

@@ -48,6 +48,12 @@ class Scene {
 		string sceneDescription;
 		bool   printViewFactors;
 		bool   printParticles;
+		int    particleCount;
+		Vector particleBoundingBoxLow;
+		Vector particleBoundingBoxHigh;
+		
+		std::vector<int> activePrimitives; 
+		
     public:
         static int numThreads;
     

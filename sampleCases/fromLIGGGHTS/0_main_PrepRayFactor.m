@@ -8,40 +8,33 @@ SRC_PATH='../../octave';
 addpath(SRC_PATH); %Source octave magic
 
 %%%%%%%%%%%%%%%%%%%%%%%% USER INPUT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Layout of input, and STL file name
 data.fileIn = 'dump.liggghts';
-data.STLprefix='STL';
 data.ColumID  = 1; %Column with Global ID
 data.ColumPos = 3; %Column with x position
 data.ColumRad =15; %Column with radius
+data.STLprefix='STL';
 
-
-#This is used to select particles. Keept empty to take all particles in dump
-# file
-domain.bound.x = [0,5];
-domain.bound.y = [0,5];
-domain.bound.z = [0,12];
-
-%the wall(s) 
+%the wall(s). You can specify multiple walls - all of them will be analyzed 
 domain.walls{1}.span = [10  ...
                         10  ...
                         0]; %this is an xy plane with a certain length, so no need to rotate for rayfactor
-domain.walls{1}.normalDir = 1; %in positive direction (here: z);
+domain.walls{1}.normalDir = 1; %in positive direction (here: z): important since rays are shoot from this direction only!;
 domain.walls{1}.origin = [0 0 0]; %Origin at zero : this is NOT STANDARD for rayfactor, so need to translate
 
-%the wall(s) 
 domain.walls{2}.span = domain.walls{1}.span ;
-domain.walls{2}.normalDir = -1; %in NEGATIVE direction (here: minus z);
-domain.walls{2}.origin = [0 0 1.12]; %Origin at zero : this is NOT STANDARD for rayfactor, so need to translate
+domain.walls{2}.normalDir = 1; %same as before - just to check random number generator
+domain.walls{2}.origin = [0 0 0]; %Origin at zero : this is NOT STANDARD for rayfactor, so need to translate
 
+domain.walls{3}.span = domain.walls{1}.span ;
+domain.walls{3}.normalDir = -1; %in NEGATIVE direction (here: minus z);
+domain.walls{3}.origin = [0 0 1.12]; %Origin at zero : this is NOT STANDARD for rayfactor, so need to translate
 
-domain.scale.x = 1.0;  %Should be equal to 1 to easily calc volume fraction
-domain.scale.y = 1.0;
-domain.scale.z = 1.0;
 
 querry.order                = false;	   # Should be ordered to any specific x/y/z - TODO: implement
-querry.particleOfInterest   = 3;       # enables to select a particle of interest which will be analysed, if wall is written, automatically set to false 
-querry.writeFiles             = true;
-globalRayDensity            = 2e5; %ray density per unit area
+%querry.particleOfInterest   = 3;       # TODO: implement. enables to select a particle of interest which will be analysed, if wall is written, automatically set to false 
+querry.writeFiles             = true; %Main swith for writing files
+globalRayDensity            = 1e6; %ray density per unit area
 
 %%%%%%%%%%%%%%%%%%%%%%%% USER INPUT END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -154,10 +147,9 @@ if(querry.writeFiles)
         string = sprintf('  </primitive>\n');
         fprintf(fid,[string]); 
     endfor
-    
     %...also dump to STL
     stlWriter(file_nameStl, domain.walls);
-
+    
     %PARTICLES
     i=1;
     while(i<=size(particles.radius,1))      
@@ -177,6 +169,9 @@ if(querry.writeFiles)
                 fprintf(fid,[string]); 
                 i=i+1;
     end  
+
+    
+   
     string = sprintf('</geometry> \n</project>\n');
     fprintf(fid,[string]); 
     fclose(fid);
