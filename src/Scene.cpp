@@ -560,7 +560,8 @@ void Scene::findViewFactors()
 
 		gettimeofday(&startTime, NULL);
 		
-		if(pobj->willAnalyse()) {
+		if(pobj->willAnalyse()) 
+		{
 		    //Perform  calculateion
 			pobj->traceFactors(head, vfm);
 			
@@ -571,9 +572,8 @@ void Scene::findViewFactors()
                       << ", and area = "
                       << pobj->surfaceArea()
                       << endl;
-            pobj->invertViewFactors(head,vfm,vfmInverse);
 #endif
-
+			pobj->invertViewFactors(head,vfm,vfmInverse);
 		}
 		
 		gettimeofday(&endTime, NULL);
