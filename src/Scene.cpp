@@ -23,6 +23,7 @@ Scene::Scene()
 	particleCount    = 0;  
 	particleBoundingBoxLow.set(9e9,9e9,9e9,9e9);
 	particleBoundingBoxHigh.set(-9e9,-9e9,-9e9,-9e9);
+	calcVFInferse=true;
 }
 
 //Note put a deconstructor: see free Scene
@@ -534,6 +535,27 @@ float Scene::getNumPrimitives()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+//	Scene::setCalculation
+//
+//	Comments : Routine to apply a number of settings
+//
+//	Date		Developer		Action
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	28/08/18	StefanRadl		Created
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Scene::setCalculation(bool calcInv, int inputSwitch, int outputSwitch)
+{
+	calcVFInferse = calcInv;
+	cout << "calcVFInferse: " << calcVFInferse << endl
+		 << "inputSwitch: " << inputSwitch << endl
+		 << "outputSwitch: " << outputSwitch
+		 << endl;
+	return;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 //	Scene::findViewFactors
 //
 //	Comments : Driver routine to find to process each object and calculate the view factor matrix
@@ -565,6 +587,9 @@ void Scene::findViewFactors()
 		    //Perform  calculateion
 			pobj->traceFactors(head, vfm);
 			
+			if(calcVFInferse)
+			{
+				pobj->invertViewFactors(head,vfm,vfmInverse);
 			//Invert viewfactor for ease
 #if VERBOSE_1 
 			std::cout << "inverting VFMatrix for object with ID " 
@@ -573,7 +598,8 @@ void Scene::findViewFactors()
                       << pobj->surfaceArea()
                       << endl;
 #endif
-			pobj->invertViewFactors(head,vfm,vfmInverse);
+		    }
+
 		}
 		
 		gettimeofday(&endTime, NULL);
@@ -587,7 +613,8 @@ void Scene::findViewFactors()
 	if(printViewFactors)
 	{
 	    vfm->print(string("vfMatrix.txt"), 6);
-	    vfmInverse->print(string("vfMatrixInverted.txt"), 6);
+		if(calcVFInferse)
+			vfmInverse->print(string("vfMatrixInverted.txt"), 6);
 	}
 	
 	if(printParticles)
@@ -622,11 +649,15 @@ void Scene::printParticlesToFile(string filename, int precision)
     out << particleBoundingBoxLow._x << " " << particleBoundingBoxHigh._x  << endl;
     out << particleBoundingBoxLow._y << " " << particleBoundingBoxHigh._y  << endl;
     out << particleBoundingBoxLow._z << " " << particleBoundingBoxHigh._z  << endl;
-    out << "ITEM: ATOMS id type x y z radius";
+    out << "ITEM: ATOMS id type x y z radius isActive";
     
     //Iterate active primitives and write header
     for (std::vector<int>::iterator it = activePrimitives.begin(); it != activePrimitives.end(); ++it)
-        out << " vf_" << *it << " vfInverse_" << *it;
+	{
+        out << " vf_" << getObject(*it)->globalID ;
+		if(calcVFInferse)
+			out << " vfInverse_" << getObject(*it)->globalID;
+	}
     out << endl;
 
     int j = 0;
@@ -640,8 +671,18 @@ void Scene::printParticlesToFile(string filename, int precision)
                 << pobj->center._y << " "
                 << pobj->center._z << " ";
             out << pobj->scaleVector._x << " ";
+			bool isActive=false;
             for (std::vector<int>::iterator it = activePrimitives.begin(); it != activePrimitives.end(); ++it)
-                out << vfm->getViewFactor(*it, j) << " " << vfmInverse->getViewFactor(*it, j) << " ";
+			{
+				if(*it==j) isActive=true;
+			}
+			out << isActive << " ";
+            for (std::vector<int>::iterator it = activePrimitives.begin(); it != activePrimitives.end(); ++it)
+			{
+                out << vfm->getViewFactor(*it, j) << " ";
+				if(calcVFInferse)
+					out << vfmInverse->getViewFactor(*it, j) << " ";
+			}
 		    out << endl;
 		    out << std::fixed;	    
 	    }

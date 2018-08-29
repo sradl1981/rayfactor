@@ -51,6 +51,7 @@ class Scene {
 		int    particleCount;
 		Vector particleBoundingBoxLow;
 		Vector particleBoundingBoxHigh;
+		bool   calcVFInferse;
 		
 		std::vector<int> activePrimitives; 
 		
@@ -68,6 +69,7 @@ class Scene {
 		float getNumPrimitives();
 	
         Primitive* getObject(int obID);
+		void setCalculation(bool,int,int);
         void findViewFactors();		// Will change to radiative heat transfer -> look at shade
         void printParticlesToFile(string filename, int precision);
 };

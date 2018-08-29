@@ -26,6 +26,7 @@ int main (int argc, char ** argv) {
 	Scene scene;
 
     bool standardInputFile=false;
+	bool calcVFInferse=true;
 	string xmlpath = "input.xml";
     if(argc>2)
     {
@@ -42,13 +43,17 @@ int main (int argc, char ** argv) {
         else
             standardInputFile=true;
     }
-
+	if(argc>4)
+	{
+		if (strcmp(argv[4],"-noInverse") == 0)
+			calcVFInferse=false;
+	}
+	
     if(standardInputFile)
         printf("will use input.xml as the input file.\n");
 
 	scene.readScene(xmlpath.c_str());
-
-	//readFile(scene);
+	scene.setCalculation(calcVFInferse,-1,-2);
 	struct timeval startTime, endTime;
 	
 	gettimeofday(&startTime, NULL);
