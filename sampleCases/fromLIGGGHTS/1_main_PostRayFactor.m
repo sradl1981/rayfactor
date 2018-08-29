@@ -9,7 +9,7 @@ addpath(SRC_PATH); %Source octave magic
 
 data.fileIn = 'rayFactor.liggghts';
 myFontSize = 20;
-thresholdVF         = 1e-6;
+thresholdVF         = 5e-6;
 data.IDGlobalID     = 1;
 data.IDx            = 3;
 data.IDradius        = 6;
@@ -58,3 +58,14 @@ set (hx, "fontsize", myFontSize);
 hy=ylabel('\epsilon_{i-j}');
 set (hy, "fontsize", myFontSize);
 set(gca, "linewidth", 4, "fontsize", myFontSize)
+
+%perform fit
+data.sample.logVF=log(data.sample.VF);
+%[resultF.P,resultF.S]= polyfit(data.sample.Sij,data.sample.logVF,1);
+resultF.x=linspace(0,max(data.sample.Sij),100);
+resultF.a=max(data.sample.VF);
+resultF.b=mean(-(data.sample.logVF-log(resultF.a))./data.sample.Sij);
+resultF.y=resultF.a*exp(-resultF.b*resultF.x)
+hold on
+semilogy(resultF.x,resultF.y,'k--','linewidth',3);
+ylim([thresholdVF .1])
